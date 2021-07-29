@@ -1,3 +1,4 @@
+using AyeAyeBot3000.Giphy;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
@@ -19,6 +20,7 @@ namespace AyeAyeBot3000
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddHostedService<Worker>();
+                    services.AddSingleton<GiphyService>();
                 });
     }
 }

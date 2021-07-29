@@ -1,3 +1,4 @@
+using AyeAyeBot3000.Giphy;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
@@ -19,18 +20,27 @@ namespace AyeAyeBot3000
         private ILogger<Worker> logger;
         private IConfiguration configuration;
         private DiscordClient discordClient;
+        private GiphyService giphy;
 
-        public Worker(ILogger<Worker> logger, IConfiguration configuration)
+        private string discordBotToken;
+
+        public Worker(ILogger<Worker> logger, IConfiguration configuration, GiphyService giphy)
         {
             this.logger = logger;
             this.configuration = configuration;
+            this.giphy = giphy;
+
+
+            discordBotToken = configuration["DiscordBotToken"];
+
+            
         }
 
         public override async Task StartAsync(CancellationToken cancellationToken)
         {
             logger.LogInformation("Starting discord bot");
 
-            string discordBotToken = configuration["DiscordBotToken"];
+           
             discordClient = new DiscordClient(new DiscordConfiguration()
             {
                 Token = discordBotToken,
@@ -84,29 +94,16 @@ namespace AyeAyeBot3000
 
             if(e.After != null && (e.Before == null || e.Before.Channel == null))
             {
-                var gif = await GetGif("party");
+                
                 var msg = await new DiscordMessageBuilder()
-                    .WithContent($"Shits Happening Boyos  \n {gif}")                    
+                    .WithContent($"Shits Happening Boyos  \n {await giphy.GetGif("party")}")                    
                     .WithAllowedMentions(new IMention[] { new EveryoneMention() })
                     .SendAsync(generalTextChannel);
             }
- 
-           
+          
         }
 
 
-        private async Task<string> GetGif(string subject)
-        {
-            string giphyToken = configuration["GiphyKey"];
 
-            var httpClient = new HttpClient();
-            httpClient.BaseAddress = new Uri("api.giphy.com");
-            var result = await httpClient.GetFromJsonAsync<GiphyResponse>($"/v1/gifs/random?api_key={giphyToken}&tag={subject}");
-
-
-            return result.Data.ImageUrl;
-
-            
-        }
     }
 }
